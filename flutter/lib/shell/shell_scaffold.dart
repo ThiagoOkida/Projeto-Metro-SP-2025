@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Importa tanto o estado quanto o controller de login
 import '../state/auth.dart';
+import '../state/login_controller.dart';
 
 class ShellScaffold extends ConsumerWidget {
   const ShellScaffold({super.key, required this.child});
@@ -58,7 +61,8 @@ class ShellScaffold extends ConsumerWidget {
     );
   }
 
-  Widget _navItem(BuildContext context, String route, String label, IconData icon) {
+  Widget _navItem(
+      BuildContext context, String route, String label, IconData icon) {
     return ListTile(
       leading: Icon(icon, color: Colors.indigo.shade600),
       title: Text(label),
