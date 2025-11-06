@@ -133,7 +133,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: () {
-                          print('Botão "Cadastre um novo contribuinte" pressionado!');
+                          context.go('/cadastro');
                         },
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.grey.shade700, 

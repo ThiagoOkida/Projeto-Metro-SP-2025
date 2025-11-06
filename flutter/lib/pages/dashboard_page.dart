@@ -125,7 +125,6 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
-[privado]
 class _SummaryCard extends StatelessWidget {
   final String title;
   final String value;
