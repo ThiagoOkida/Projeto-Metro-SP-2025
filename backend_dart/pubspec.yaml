@@ -17,6 +17,7 @@ dependencies:
   shelf_static: ^1.1.2           # Para servir arquivos estáticos (opcional)
   http_parser: ^4.0.2            # Utilitário para headers HTTP
   path: ^1.9.0                   # Manipulação de caminhos
+  http: ^1.2.0       # SDK do Firebase para Dart
 
 dev_dependencies:
   lints: ^3.0.0

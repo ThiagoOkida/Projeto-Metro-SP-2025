@@ -7,6 +7,7 @@
       "name": "backend_dart",
       "version": "1.0.0",
       "dependencies": [
+        "http",
         "http_parser",
         "path",
         "shelf",
@@ -55,6 +56,16 @@
       "name": "lints",
       "version": "3.0.0",
       "dependencies": []
+    },
+    {
+      "name": "http",
+      "version": "1.5.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
+      ]
     },
     {
       "name": "path",
@@ -336,6 +347,16 @@
       ]
     },
     {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "meta",
+      "version": "1.16.0",
+      "dependencies": []
+    },
+    {
       "name": "string_scanner",
       "version": "1.4.1",
       "dependencies": [
@@ -355,11 +376,6 @@
       ]
     },
     {
-      "name": "meta",
-      "version": "1.16.0",
-      "dependencies": []
-    },
-    {
       "name": "http_methods",
       "version": "1.1.1",
       "dependencies": []
@@ -375,11 +391,6 @@
       "dependencies": [
         "web"
       ]
-    },
-    {
-      "name": "web",
-      "version": "1.1.1",
-      "dependencies": []
     },
     {
       "name": "crypto",

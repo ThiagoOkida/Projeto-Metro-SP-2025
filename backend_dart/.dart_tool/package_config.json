@@ -80,6 +80,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "http",
+      "rootUri": "file:///C:/Users/jp_ca/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "http_methods",
       "rootUri": "file:///C:/Users/jp_ca/AppData/Local/Pub/Cache/hosted/pub.dev/http_methods-1.1.1",
       "packageUri": "lib/",
@@ -321,8 +327,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.8.0",
+  "generatorVersion": "3.9.2",
   "flutterRoot": "file:///C:/flutter",
-  "flutterVersion": "3.32.0",
+  "flutterVersion": "3.35.7",
   "pubCache": "file:///C:/Users/jp_ca/AppData/Local/Pub/Cache"
 }

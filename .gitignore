@@ -1,0 +1,43 @@
+# ===================================================================
+# CHAVE DE ADMIN DO FIREBASE - REGRA MAIS IMPORTANTE
+# ===================================================================
+# Nunca envie sua chave de serviço para o GitHub!
+/backend_dart/service-account.json
+
+
+# ===================================================================
+# REGRAS GERAIS DE DART & FLUTTER
+# ===================================================================
+
+# Arquivos de metadados do Dart
+.dart_tool/
+.packages
+.pub-cache/
+
+# Arquivos gerados pelo 'flutter pub get' ou 'flutter build'
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# O pubspec.lock DEVE ser enviado para o GitHub,
+# mas se você tiver conflitos, o .local é ignorado.
+pubspec.lock.local
+
+# Arquivos de log e teste
+coverage/
+*.log
+test/.outputs/
+test/.test_coverage.json
+
+
+# ===================================================================
+# REGRAS DE IDES (EDITORES DE CÓDIGO)
+# ===================================================================
+
+# VS Code
+.vscode/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
