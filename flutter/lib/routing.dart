@@ -9,14 +9,12 @@ import 'pages/alertas_page.dart';
 import 'pages/usuarios_page.dart';
 import 'pages/configuracoes_page.dart';
 import 'shell/shell_scaffold.dart';
-import 'pages/cadastro_page.dart'; // <--- Importação que você já tinha
+import 'pages/cadastro_page.dart'; 
 
 final router = GoRouter(
   initialLocation: '/login',
   routes: [
     GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
-
-    // Rota de cadastro adicionada aqui, fora do ShellRoute
     GoRoute(
       path: '/cadastro',
       builder: (context, state) => CadastroPage(),
@@ -26,7 +24,7 @@ final router = GoRouter(
       builder: (context, state, child) => ShellScaffold(child: child),
       routes: [
         GoRoute(path: '/', builder: (_, __) => const DashboardPage()),
-        GoRoute(path: '/materiais', builder: (_, __) => const MateriaisPage()),
+        GoRoute(path: '/materiais', builder: (_, __) => const MaterialsPage()),
         GoRoute(
             path: '/instrumentos',
             builder: (_, __) => const InstrumentosPage()),
