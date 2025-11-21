@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../state/auth.dart';
 import '../state/login_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -14,8 +13,8 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController(text: 'admin@metro.sp.gov.br');
-  final _password = TextEditingController(text: 'admin123');
+  final _email = TextEditingController(text: 'admin@metrosp.gov.br');
+  final _password = TextEditingController(text: 'Admin123!');
   bool _obscure = true;
 
   @override
@@ -47,17 +46,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-
                       Image.asset(
                         "assets/imagens/logo.png",
                         height: 60,
                         alignment: Alignment.center,
                       ),
                       const SizedBox(height: 16),
-
                       const Text(
                         'Metro SP - Gestão de Processos',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 4),
@@ -66,22 +64,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         controller: _email,
                         decoration: const InputDecoration(
                           labelText: 'Login',
-                          hintText: 'admin', 
+                          hintText: 'admin',
                           prefixIcon: Icon(Icons.person),
                         ),
-                        validator: (v) =>
-                            (v == null || v.isEmpty) ? 'Informe o e-mail' : null,
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? 'Informe o e-mail'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _password,
                         decoration: InputDecoration(
                           labelText: 'Senha',
-                          hintText: '••••••••••••', 
+                          hintText: '••••••••••••',
                           prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscure ? Icons.visibility : Icons.visibility_off,
+                              _obscure
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () =>
                                 setState(() => _obscure = !_obscure),
@@ -116,19 +117,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 }
                               },
                         style: FilledButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 16), 
-                          shape: RoundedRectangleBorder( 
-                            borderRadius: BorderRadius.circular(12),
-                          )
-                        ),
+                            backgroundColor: primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            )),
                         child: loginState.isLoading
                             ? const SizedBox(
                                 height: 18,
                                 width: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white),
                               )
-                            : const Text('Entrar', style: TextStyle(fontSize: 16)),
+                            : const Text('Entrar',
+                                style: TextStyle(fontSize: 16)),
                       ),
                       const SizedBox(height: 12),
                       TextButton(
@@ -136,7 +138,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           context.go('/cadastro');
                         },
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey.shade700, 
+                          foregroundColor: Colors.grey.shade700,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: const Text(

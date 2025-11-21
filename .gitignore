@@ -4,6 +4,22 @@
 # Nunca envie sua chave de serviço para o GitHub!
 /backend_dart/service-account.json
 
+# Arquivos de configuração do Firebase (Service Account Keys)
+**/service-account*.json
+**/*-service-account*.json
+**/*service-account*.json
+serviceAccountKey.json
+
+# ===================================================================
+# ARQUIVOS DE AMBIENTE (.env)
+# ===================================================================
+# Nunca commitar arquivos .env com credenciais reais!
+.env
+.env.local
+.env.*.local
+flutter/.env
+backend_dart/.env
+
 
 # ===================================================================
 # REGRAS GERAIS DE DART & FLUTTER
@@ -41,3 +57,54 @@ test/.test_coverage.json
 .idea/
 *.iml
 *.ipr
+
+# ===================================================================
+# DOCUMENTAÇÃO E SCRIPTS DE SETUP (IGNORAR)
+# ===================================================================
+# Mantém apenas README.md principal e arquivos essenciais
+# Os guias de setup podem ser ignorados pois são específicos do ambiente
+
+# Guias de configuração e setup
+COMO_CRIAR_USUARIOS_FIRESTORE.md
+COMO_IMPORTAR_FIRESTORE.md
+CONFIGURAR_REGRAS_FIRESTORE.md
+CRIAR_USUARIO_ADMIN_FIRESTORE.md
+ENV_SETUP.md
+FIREBASE_CREDENTIALS.md
+FIREBASE_SETUP.md
+POPULATE_DATABASE.md
+SISTEMA_NOTIFICACOES_EMAIL.md
+VERIFICAR_USUARIO_ADMIN.md
+
+# Dados de exemplo e scripts manuais
+firestore_import_data.json
+create_users_manual.js
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Arquivos de build do Flutter
+flutter/build/
+flutter/.dart_tool/
+flutter/.flutter-plugins
+flutter/.flutter-plugins-dependencies
+flutter/*.iml
+
+# Arquivos de configuração local do Android
+flutter/android/local.properties
+flutter/android/.gradle/
+flutter/android/app/google-services.json
+
+# Arquivos de configuração do iOS (gerados automaticamente)
+flutter/ios/Podfile.lock
+flutter/ios/.symlinks/
+flutter/ios/Flutter/Flutter.framework
+flutter/ios/Flutter/Flutter.podspec
+
+# Arquivos de configuração do Windows/Linux/MacOS (gerados automaticamente)
+flutter/windows/flutter/generated_plugin_registrant.cc
+flutter/windows/flutter/generated_plugin_registrant.h
+flutter/linux/flutter/generated_plugin_registrant.cc
+flutter/linux/flutter/generated_plugin_registrant.h
+flutter/macos/Flutter/GeneratedPluginRegistrant.swift

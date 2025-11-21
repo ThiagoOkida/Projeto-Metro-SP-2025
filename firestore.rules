@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Função auxiliar para verificar se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Função auxiliar para verificar se o documento do usuário existe
+    function userExists() {
+      return exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+    
+    // Função auxiliar para verificar se o usuário é admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             userExists() && 
+             (get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin' ||
+              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == 'admin');
+    }
+    
+    // Função auxiliar para verificar se o usuário é gestor ou admin
+    function isGestorOrAdmin() {
+      return isAuthenticated() && 
+             userExists() && 
+             (get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin' ||
+              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'gestor' ||
+              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == 'admin' ||
+              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == 'gestor');
+    }
+    
+    // Coleção de usuários
+    match /usuarios/{userId} {
+      // Qualquer usuário autenticado pode ler todos os usuários
+      allow read: if isAuthenticated();
+      // Apenas admin pode criar
+      allow create: if isAdmin();
+      // Gestor e admin podem atualizar
+      allow update: if isGestorOrAdmin();
+      // Gestor e admin podem deletar
+      allow delete: if isGestorOrAdmin();
+    }
+    
+    // Coleção de materiais
+    match /materiais/{materialId} {
+      // Qualquer usuário autenticado pode ler
+      allow read: if isAuthenticated();
+      // Apenas gestor ou admin pode escrever
+      allow write: if isGestorOrAdmin();
+    }
+    
+    // Coleção de instrumentos
+    match /instrumentos/{instrumentoId} {
+      // Qualquer usuário autenticado pode ler
+      allow read: if isAuthenticated();
+      // Qualquer usuário autenticado pode atualizar (para retirar/devolver)
+      // Apenas gestor ou admin pode criar/deletar
+      allow create, delete: if isGestorOrAdmin();
+      allow update: if isAuthenticated();
+    }
+    
+    // Coleção de alertas
+    match /alertas/{alertaId} {
+      // Qualquer usuário autenticado pode ler
+      allow read: if isAuthenticated();
+      // Qualquer usuário autenticado pode atualizar (para resolver/ignorar)
+      // Apenas gestor ou admin pode criar/deletar
+      allow create, delete: if isGestorOrAdmin();
+      allow update: if isAuthenticated();
+    }
+    
+    // Coleção de requisições
+    match /requisicoes/{requisicaoId} {
+      // Qualquer usuário autenticado pode ler
+      allow read: if isAuthenticated();
+      // Qualquer usuário autenticado pode criar requisições
+      allow create: if isAuthenticated();
+      // Apenas gestor ou admin pode atualizar/deletar
+      allow update, delete: if isGestorOrAdmin();
+    }
+    
+    // Coleção de configurações (admin e gestor)
+    match /configuracoes/{configId} {
+      // Admin e gestor podem ler e escrever
+      allow read, write: if isGestorOrAdmin();
+    }
+  }
+}
+

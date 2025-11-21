@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Importa tanto o estado quanto o controller de login
 import '../state/auth.dart';
 import '../state/login_controller.dart';
+import '../providers/data_providers.dart';
 
 class ShellScaffold extends ConsumerWidget {
   const ShellScaffold({super.key, required this.child});
@@ -12,28 +14,29 @@ class ShellScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loggedIn = ref.watch(authStateProvider);
+    final authState = ref.watch(authStateProvider);
+    final isLoggedIn = authState.asData?.value != null;
 
     return Scaffold(
       appBar: AppBar(
         elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
         title: const Text(
           'São Paulo Stock Sync',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          if (loggedIn) const _UserMenu(),
+          if (isLoggedIn) const _UserMenu(),
         ],
       ),
       drawer: Drawer(
         elevation: 6,
         child: ListView(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF1565C0)),
-              child: Center(
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: const Center(
                 child: Text(
                   'Menu Principal',
                   style: TextStyle(
@@ -48,12 +51,61 @@ class ShellScaffold extends ConsumerWidget {
             _navItem(context, '/instrumentos', 'Instrumentos', Icons.build),
             _navItem(context, '/relatorios', 'Relatórios', Icons.bar_chart),
             _navItem(context, '/alertas', 'Alertas', Icons.warning_amber),
-            _navItem(context, '/usuarios', 'Usuários', Icons.people),
-            _navItem(context, '/configuracoes', 'Configurações', Icons.settings),
+            // Mostra item de usuários apenas para gestores e admins
+            // Usa Consumer para reagir a mudanças no provider
+            Consumer(
+              builder: (context, ref, child) {
+                final isGestorOrAdmin = ref.watch(isGestorOrAdminProvider);
+                final currentUserAsync = ref.watch(currentUserProvider);
+                
+                // Debug no console
+                currentUserAsync.whenData((usuario) {
+                  if (usuario != null) {
+                    debugPrint('🔍 Menu - Usuário: ${usuario.email}, Role: ${usuario.role}, isGestorOrAdmin: $isGestorOrAdmin');
+                  } else {
+                    debugPrint('⚠️ Menu - Usuário não encontrado no Firestore');
+                  }
+                });
+                
+                // Widget de debug (remover depois)
+                if (kDebugMode) {
+                  return Column(
+                    children: [
+                      if (isGestorOrAdmin)
+                        _navItem(context, '/usuarios', 'Usuários', Icons.people)
+                      else
+                        ListTile(
+                          leading: Icon(Icons.people, color: Colors.grey[400]),
+                          title: Text(
+                            'Usuários (sem permissão)',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          ),
+                          subtitle: currentUserAsync.when(
+                            data: (usuario) => Text(
+                              usuario == null 
+                                ? 'Usuário não encontrado no Firestore'
+                                : 'Role: ${usuario.role}',
+                              style: TextStyle(color: Colors.red[700], fontSize: 10),
+                            ),
+                            loading: () => const Text('Carregando...', style: TextStyle(fontSize: 10)),
+                            error: (_, __) => const Text('Erro ao carregar', style: TextStyle(fontSize: 10)),
+                          ),
+                        ),
+                    ],
+                  );
+                }
+                
+                if (isGestorOrAdmin) {
+                  return _navItem(context, '/usuarios', 'Usuários', Icons.people);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            _navItem(
+                context, '/configuracoes', 'Configurações', Icons.settings),
           ],
         ),
       ),
-      backgroundColor: const Color(0xFFF8F9FA),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: child,
@@ -64,7 +116,10 @@ class ShellScaffold extends ConsumerWidget {
   Widget _navItem(
       BuildContext context, String route, String label, IconData icon) {
     return ListTile(
-      leading: Icon(icon, color: Colors.indigo.shade600),
+      leading: Icon(
+        icon,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       title: Text(label),
       onTap: () {
         context.go(route);
@@ -128,19 +183,31 @@ class _UserMenuState extends ConsumerState<_UserMenu> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD),
+            color: Theme.of(context).colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.blue.shade200),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            ),
           ),
           child: Row(
-            children: const [
-              Icon(Icons.person_outline, color: Colors.indigo),
-              SizedBox(width: 8),
+            children: [
+              Icon(
+                Icons.person_outline,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
               Text(
                 'admin@metro.sp.gov.br',
-                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
               ),
-              Icon(Icons.keyboard_arrow_down, color: Colors.indigo),
+              Icon(
+                Icons.keyboard_arrow_down,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ],
           ),
         ),

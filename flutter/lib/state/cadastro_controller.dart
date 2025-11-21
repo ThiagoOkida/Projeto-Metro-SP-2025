@@ -1,7 +1,8 @@
 // flutter/lib/state/cadastro_controller.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'auth.dart';
 
-// --- 1. O Estado (igual ao que tínhamos) ---
+// --- 1. O Estado ---
 enum CadastroStatus { idle, loading, success, error }
 
 class CadastroState {
@@ -20,44 +21,67 @@ class CadastroState {
 
 // --- 2. O Notifier (O Controller) ---
 class CadastroController extends StateNotifier<CadastroState> {
-  // Se precisar ler outros providers (como o AuthRepository),
-  // você pode recebê-lo no construtor.
-  // final AuthRepository _authRepository;
-
-  CadastroController(this.ref) : super(CadastroState()); // , this._authRepository
+  CadastroController(this.ref) : super(CadastroState());
 
   final Ref ref;
 
   Future<void> cadastrar(
       String nome, String email, String password, String confirmPassword) async {
-    // 1. Validação simples
+    // 1. Validação de senhas
     if (password != confirmPassword) {
       state = state.copyWith(
         status: CadastroStatus.error,
         errorMessage: 'As senhas não conferem',
       );
-      // Reseta o estado para idle para o usuário poder tentar de novo
       _resetErrorState();
       return;
     }
 
-    // 2. Inicia o loading
+    // 2. Validação de senha mínima
+    if (password.length < 6) {
+      state = state.copyWith(
+        status: CadastroStatus.error,
+        errorMessage: 'A senha deve ter pelo menos 6 caracteres',
+      );
+      _resetErrorState();
+      return;
+    }
+
+    // 3. Inicia o loading
     state = state.copyWith(status: CadastroStatus.loading);
 
     try {
-      // 3. Chamar o repositório (descomente quando tiver)
-      // await _authRepository.cadastrar(nome, email, password);
+      // 4. Cria a conta no Firebase Auth
+      final authRepo = ref.read(authRepositoryProvider);
+      final userCredential = await authRepo.cadastrar(email, password);
 
-      // Simulação de sucesso (REMOVA ISSO QUANDO CONECTAR O REPO)
-      await Future.delayed(const Duration(seconds: 2));
+      // 5. Salva os dados do usuário no Firestore
+      if (userCredential.user != null) {
+        await authRepo.salvarUsuarioNoFirestore(
+          userCredential.user!.uid,
+          nome,
+          email,
+        );
+      }
 
-      // 4. Sucesso
+      // 6. Sucesso
       state = state.copyWith(status: CadastroStatus.success);
     } catch (e) {
-      // 5. Erro
+      // 7. Erro
+      String errorMessage = 'Erro ao cadastrar';
+      if (e.toString().contains('email-already-in-use')) {
+        errorMessage = 'Este email já está em uso';
+      } else if (e.toString().contains('weak-password')) {
+        errorMessage = 'A senha é muito fraca';
+      } else if (e.toString().contains('invalid-email')) {
+        errorMessage = 'Email inválido';
+      } else {
+        errorMessage = e.toString().replaceFirst('Exception: ', '');
+      }
+
       state = state.copyWith(
         status: CadastroStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: errorMessage,
       );
       _resetErrorState();
     }
@@ -76,7 +100,5 @@ class CadastroController extends StateNotifier<CadastroState> {
 // --- 3. O Provedor (O que a UI vai consumir) ---
 final cadastroControllerProvider =
     StateNotifierProvider<CadastroController, CadastroState>((ref) {
-  // Ex: final authRepo = ref.watch(authRepositoryProvider);
-  // return CadastroController(ref, authRepo);
   return CadastroController(ref);
 });

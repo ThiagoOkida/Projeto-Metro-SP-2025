@@ -1,26 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spss_flutter/pages/login_page.dart';
 import 'package:spss_flutter/state/auth.dart';
 import 'package:spss_flutter/state/login_controller.dart';
 
+/// Mock UserCredential simples para testes
+class _MockUserCredential implements UserCredential {
+  @override
+  final User? user;
+  
+  @override
+  AdditionalUserInfo? get additionalUserInfo => null;
+  
+  @override
+  AuthCredential? get credential => null;
+
+  _MockUserCredential({
+    this.user,
+  });
+}
+
+/// Mock User simples para testes
+class _MockUser implements User {
+  @override
+  final String uid;
+  
+  @override
+  final String? email;
+  
+  _MockUser({required this.uid, this.email});
+
+  // Implementações mínimas necessárias
+  @override
+  Future<String?> getIdToken([bool forceRefresh = false]) async => 'mock-token';
+  
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// Mock simplificado do AuthRepository
 class MockAuthRepository extends AuthRepository {
-  MockAuthRepository({this.shouldSucceed = true}) : super(baseUrl: 'mock://api');
+  MockAuthRepository({this.shouldSucceed = true});
 
   final bool shouldSucceed;
 
   @override
-  Future<String> login(String email, String password) async {
+  Future<UserCredential> login(String email, String password) async {
     await Future.delayed(const Duration(milliseconds: 100));
     if (shouldSucceed &&
         email == 'admin@metro.sp.gov.br' &&
         password == 'admin123') {
-      return 'mock-token';
+      final mockUser = _MockUser(uid: 'mock-uid', email: email);
+      return _MockUserCredential(user: mockUser);
     } else {
       throw Exception('Falha no login');
     }
+  }
+  
+  @override
+  Future<void> logout() async {
+    // Mock implementation
   }
 }
 

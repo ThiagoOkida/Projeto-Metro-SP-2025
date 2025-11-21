@@ -8,10 +8,20 @@ import 'package:http/http.dart' as http;
 
 //
 // 🧾 Função para salvar usuário via REST API do Firestore
+// NOTA: Esta função é mantida para compatibilidade, mas o cadastro agora é feito
+// diretamente pelo Flutter usando Firebase Auth e Firestore SDK.
+// Para usar esta função, você precisa de um Service Account do Firebase.
 //
 Future<void> salvarUsuarioNoFirestore(
     String uid, String nome, String email) async {
-  const projectId = 'seu-projeto-id'; // Substitua pelo ID do projeto Firebase
+  // Obtém o projectId das variáveis de ambiente ou usa um valor padrão
+  final projectId = Platform.environment['FIREBASE_PROJECT_ID'] ?? 'seu-projeto-id';
+  
+  if (projectId == 'seu-projeto-id') {
+    print('⚠️  AVISO: Configure a variável de ambiente FIREBASE_PROJECT_ID');
+    print('⚠️  Ou atualize o projectId no código');
+  }
+  
   final url = Uri.parse(
     'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/usuarios/$uid',
   );
@@ -25,6 +35,8 @@ Future<void> salvarUsuarioNoFirestore(
     }
   });
 
+  // NOTA: Para usar a REST API do Firestore, você precisa de autenticação.
+  // Considere usar o Firebase Admin SDK para Dart ou configurar OAuth2.
   final response = await http.patch(
     url,
     headers: {'Content-Type': 'application/json'},
@@ -46,8 +58,10 @@ void main() async {
   final router = Router();
 
   // -------------------------------
-  // 🆕 ROTA DE CADASTRO
+  // 🆕 ROTA DE CADASTRO (OPCIONAL)
   // -------------------------------
+  // NOTA: O cadastro agora é feito diretamente pelo Flutter usando Firebase Auth e Firestore.
+  // Esta rota é mantida apenas para casos especiais ou integração com outros sistemas.
   router.post('/api/cadastro', (Request req) async {
     try {
       final body = jsonDecode(await req.readAsString());
@@ -79,23 +93,18 @@ void main() async {
   });
 
   // -------------------------------
-  // 🔐 ROTA DE LOGIN (mock)
+  // 🔐 ROTA DE LOGIN (DEPRECADA)
   // -------------------------------
+  // NOTA: A autenticação agora é feita diretamente pelo Flutter usando Firebase Auth.
+  // Esta rota é mantida apenas para compatibilidade com código legado.
+  // Considere remover esta rota se não for mais necessária.
   router.post('/auth/login', (Request req) async {
-    final body = jsonDecode(await req.readAsString());
-    final email = body['email'];
-    final password = body['password'];
-
-    if (email == 'admin@metro.sp.gov.br' && password == 'admin123') {
-      return Response.ok(
-        jsonEncode({'token': 'dummy-token-123'}),
-        headers: {'Content-Type': 'application/json'},
-      );
-    }
-
     return Response(
-      401,
-      body: jsonEncode({'error': 'Credenciais inválidas'}),
+      410, // Gone - recurso não está mais disponível
+      body: jsonEncode({
+        'error': 'Esta rota foi descontinuada. Use Firebase Auth diretamente no Flutter.',
+        'message': 'A autenticação agora é gerenciada pelo Firebase Auth no cliente.'
+      }),
       headers: {'Content-Type': 'application/json'},
     );
   });
