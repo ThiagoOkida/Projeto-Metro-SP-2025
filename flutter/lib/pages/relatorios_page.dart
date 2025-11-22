@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import '../repositories/relatorios_repository.dart';
 import '../providers/data_providers.dart';
+import '../services/export_service.dart';
 
 class RelatoriosPage extends ConsumerStatefulWidget {
   const RelatoriosPage({super.key});
@@ -66,11 +68,7 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
                 const SizedBox(width: 16),
                 // Botão Exportar
                 ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Funcionalidade de exportação em desenvolvimento')),
-                    );
-                  },
+                  onPressed: () => _exportarRelatorio(context),
                   icon: const Icon(Icons.download),
                   label: const Text('Exportar'),
                   style: ElevatedButton.styleFrom(
@@ -381,6 +379,96 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
       return 'R\$ ${(value / 1000).toStringAsFixed(1)}K';
     }
     return 'R\$ ${value.toStringAsFixed(0)}';
+  }
+
+  Future<void> _exportarRelatorio(BuildContext context) async {
+    // Verifica se os dados já estão carregados
+    final statsAsync = ref.read(relatoriosStatsProvider(_selectedPeriodDays));
+    
+    if (statsAsync.isLoading) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aguarde o carregamento dos dados e tente novamente'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (statsAsync.hasError) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar dados: ${statsAsync.error}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final stats = statsAsync.value;
+    if (stats == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Dados não disponíveis para exportação'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    try {
+      // Mostra mensagem de processamento
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 16),
+              Text('Gerando relatório...'),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // Exporta o CSV
+      final exportService = ExportService();
+      await exportService.exportarRelatorioCSV(stats, _selectedPeriodDays);
+
+      // Mostra mensagem de sucesso
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Relatório exportado com sucesso!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e, stack) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao exportar relatório: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+      debugPrint('Erro ao exportar relatório: $e\n$stack');
+    }
   }
 }
 

@@ -1,63 +1,54 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository());
-final authStateProvider = StreamProvider<User?>((ref) {
-  return FirebaseAuth.instance.authStateChanges();
-});
 
-final isAuthenticatedProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authStateProvider);
-  return authState.asData?.value != null;
+// Provider que observa o estado de autenticação do Firebase
+final authStateProvider = StreamProvider<User?>((ref) {
+  try {
+    return FirebaseAuth.instance.authStateChanges();
+  } catch (e) {
+    // Se o Firebase não estiver inicializado, retorna um stream vazio
+    // Isso evita que o app trave com tela branca
+    debugPrint('⚠️ Firebase Auth não disponível: $e');
+    return Stream.value(null);
+  }
 });
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Efetua login com email e senha usando Firebase Auth
+  AuthRepository();
+
+  /// Faz login com email e senha usando Firebase Auth
   Future<UserCredential> login(String email, String password) async {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
-      // Salva o token de ID (opcional, para compatibilidade com código existente)
-      if (userCredential.user != null) {
-        final token = await userCredential.user!.getIdToken();
-        if (token != null) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
-        }
-      }
-      
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        throw Exception('Usuário não encontrado');
-      } else if (e.code == 'wrong-password') {
-        throw Exception('Senha incorreta');
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        throw Exception('Credenciais inválidas');
       } else if (e.code == 'invalid-email') {
         throw Exception('Email inválido');
       } else {
-        throw Exception('Erro no login: ${e.message}');
+        throw Exception('Erro ao fazer login: ${e.message}');
       }
-    } catch (e) {
-      throw Exception('Erro ao fazer login: $e');
     }
   }
 
-  /// Cria uma nova conta com email e senha
+  /// Cria uma nova conta com email e senha usando Firebase Auth
   Future<UserCredential> cadastrar(String email, String password) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
       return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -67,15 +58,17 @@ class AuthRepository {
       } else if (e.code == 'invalid-email') {
         throw Exception('Email inválido');
       } else {
-        throw Exception('Erro no cadastro: ${e.message}');
+        throw Exception('Erro ao cadastrar: ${e.message}');
       }
-    } catch (e) {
-      throw Exception('Erro ao cadastrar: $e');
     }
   }
 
-  /// Salva dados do usuário no Firestore
-  Future<void> salvarUsuarioNoFirestore(String uid, String nome, String email) async {
+  /// Salva os dados do usuário no Firestore
+  Future<void> salvarUsuarioNoFirestore(
+    String uid,
+    String nome,
+    String email,
+  ) async {
     try {
       await _firestore.collection('usuarios').doc(uid).set({
         'nome': nome,
@@ -83,26 +76,18 @@ class AuthRepository {
         'perfil': 'contribuinte',
         'criadoEm': FieldValue.serverTimestamp(),
         'atualizadoEm': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      });
     } catch (e) {
-      throw Exception('Erro ao salvar dados do usuário: $e');
+      throw Exception('Erro ao salvar usuário no Firestore: $e');
     }
   }
 
-  /// Efetua logout
+  /// Faz logout do Firebase Auth
   Future<void> logout() async {
     try {
       await _auth.signOut();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token');
     } catch (e) {
       throw Exception('Erro ao fazer logout: $e');
     }
   }
-
-  /// Retorna o usuário atual
-  User? get currentUser => _auth.currentUser;
-
-  /// Retorna o stream de mudanças de autenticação
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

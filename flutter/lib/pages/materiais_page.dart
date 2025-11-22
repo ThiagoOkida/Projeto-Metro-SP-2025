@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/data_providers.dart';
 import '../repositories/materiais_repository.dart' as repo show Material;
+import '../widgets/novo_material_dialog.dart';
 
 class MateriaisPage extends ConsumerStatefulWidget {
   const MateriaisPage({super.key});
@@ -126,11 +127,14 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Implementar dialog de novo material
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
+                  onPressed: () async {
+                    final result = await showDialog(
+                      context: context,
+                      builder: (context) => const NovoMaterialDialog(),
                     );
+                    if (result == true) {
+                      // Material criado com sucesso
+                    }
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Novo Material'),
@@ -276,25 +280,26 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
   }
 
   Widget _buildFiltros(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Filtros e Busca',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 900;
+        
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Busca
-                Expanded(
-                  flex: 3,
-                  child: TextField(
+                Text(
+                  'Filtros e Busca',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                if (isSmallScreen) ...[
+                  // Layout vertical para telas pequenas
+                  TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar por código ou descrição...',
@@ -307,12 +312,9 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Tipo
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _tipoFiltro,
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _tipoFiltro,
                     decoration: InputDecoration(
                       labelText: 'Tipo de Material',
                       border: OutlineInputBorder(
@@ -330,12 +332,9 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                     ],
                     onChanged: (value) => setState(() => _tipoFiltro = value),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Status
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _statusFiltro,
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _statusFiltro,
                     decoration: InputDecoration(
                       labelText: 'Status do Estoque',
                       border: OutlineInputBorder(
@@ -350,19 +349,94 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                     ],
                     onChanged: (value) => setState(() => _statusFiltro = value),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Limpar Filtros
-                OutlinedButton.icon(
-                  onPressed: _limparFiltros,
-                  icon: const Icon(Icons.filter_alt_outlined),
-                  label: const Text('Limpar Filtros'),
-                ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _limparFiltros,
+                      icon: const Icon(Icons.filter_alt_outlined),
+                      label: const Text('Limpar Filtros'),
+                    ),
+                  ),
+                ] else ...[
+                  // Layout horizontal para telas grandes
+                  Row(
+                    children: [
+                      // Busca
+                      Expanded(
+                        flex: 3,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Buscar por código ou descrição...',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Tipo
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _tipoFiltro,
+                          decoration: InputDecoration(
+                            labelText: 'Tipo de Material',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('Todos')),
+                            ..._categorias.map((categoria) => DropdownMenuItem(
+                              value: categoria,
+                              child: Text(categoria),
+                            )),
+                          ],
+                          onChanged: (value) => setState(() => _tipoFiltro = value),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Status
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _statusFiltro,
+                          decoration: InputDecoration(
+                            labelText: 'Status do Estoque',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('Todos')),
+                            ..._status.map((status) => DropdownMenuItem(value: status, child: Text(status))),
+                          ],
+                          onChanged: (value) => setState(() => _statusFiltro = value),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Limpar Filtros
+                      OutlinedButton.icon(
+                        onPressed: _limparFiltros,
+                        icon: const Icon(Icons.filter_alt_outlined),
+                        label: const Text('Limpar Filtros'),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -387,56 +461,188 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
       );
     }
 
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Lista de Materiais',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text('Código')),
-                DataColumn(label: Text('Descrição')),
-                DataColumn(label: Text('Tipo')),
-                DataColumn(label: Text('Unidade')),
-                DataColumn(label: Text('Saldo Total')),
-                DataColumn(label: Text('Status')),
-              ],
-              rows: materiais.map((repo.Material material) {
-                return DataRow(
-                  cells: [
-                    DataCell(Text(material.codigo ?? material.id)),
-                    DataCell(
-                      SizedBox(
-                        width: 300,
-                        child: Text(
-                          material.descricao ?? material.nome,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Em telas menores que 900px, mostra cards ao invés de tabela
+        if (constraints.maxWidth < 900) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Lista de Materiais',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    DataCell(Text(material.tipo ?? material.categoria ?? '-')),
-                    DataCell(Text(material.unidade ?? 'Peça')),
-                    DataCell(Text(
-                      '${material.quantidade}${material.quantidadeMinima != null ? ' (Min: ${material.quantidadeMinima})' : ''}',
-                    )),
-                    DataCell(_buildStatusChip(material.statusEstoque)),
+                ),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: materiais.length,
+                itemBuilder: (context, index) {
+                  return _buildMaterialCard(context, materiais[index]);
+                },
+              ),
+            ],
+          );
+        }
+
+        // Em telas maiores, mostra a tabela tradicional
+        return Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Lista de Materiais',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Código')),
+                    DataColumn(label: Text('Descrição')),
+                    DataColumn(label: Text('Tipo')),
+                    DataColumn(label: Text('Unidade')),
+                    DataColumn(label: Text('Saldo Total')),
+                    DataColumn(label: Text('Status')),
                   ],
-                );
-              }).toList(),
-            ),
+                  rows: materiais.map((repo.Material material) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(material.codigo ?? material.id)),
+                        DataCell(
+                          SizedBox(
+                            width: 300,
+                            child: Text(
+                              material.descricao ?? material.nome,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        DataCell(Text(material.tipo ?? material.categoria ?? '-')),
+                        DataCell(Text(material.unidade ?? 'Peça')),
+                        DataCell(Text(
+                          '${material.quantidade}${material.quantidadeMinima != null ? ' (Min: ${material.quantidadeMinima})' : ''}',
+                        )),
+                        DataCell(_buildStatusChip(material.statusEstoque)),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMaterialCard(BuildContext context, repo.Material material) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        material.descricao ?? material.nome,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Código: ${material.codigo ?? material.id}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildStatusChip(material.statusEstoque),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: [
+                _buildInfoItem(
+                  context,
+                  Icons.category,
+                  'Tipo',
+                  material.tipo ?? material.categoria ?? '-',
+                ),
+                _buildInfoItem(
+                  context,
+                  Icons.scale,
+                  'Unidade',
+                  material.unidade ?? 'Peça',
+                ),
+                _buildInfoItem(
+                  context,
+                  Icons.inventory,
+                  'Saldo Total',
+                  '${material.quantidade}',
+                ),
+                if (material.quantidadeMinima != null)
+                  _buildInfoItem(
+                    context,
+                    Icons.warning_amber_rounded,
+                    'Mínimo',
+                    '${material.quantidadeMinima}',
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildInfoItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 

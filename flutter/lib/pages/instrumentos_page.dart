@@ -5,6 +5,7 @@ import '../repositories/instrumentos_repository.dart' as repo;
 import '../widgets/devolver_instrumento_dialog.dart';
 import '../widgets/retirar_instrumento_dialog.dart';
 import '../widgets/detalhes_instrumento_dialog.dart';
+import '../widgets/novo_instrumento_dialog.dart';
 
 class InstrumentosPage extends ConsumerStatefulWidget {
   const InstrumentosPage({super.key});
@@ -132,11 +133,14 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Funcionalidade em desenvolvimento')),
+                  onPressed: () async {
+                    final result = await showDialog(
+                      context: context,
+                      builder: (context) => const NovoInstrumentoDialog(),
                     );
+                    if (result == true) {
+                      // Instrumento criado com sucesso
+                    }
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Novo Instrumento'),
@@ -295,25 +299,26 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
   }
 
   Widget _buildFiltros(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Filtros e Busca',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 900;
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Busca
-                Expanded(
-                  flex: 2,
-                  child: TextField(
+                Text(
+                  'Filtros e Busca',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                if (isSmallScreen) ...[
+                  // Layout vertical para telas pequenas
+                  TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar por patrimônio',
@@ -326,12 +331,9 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Status
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _statusFiltro,
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _statusFiltro,
                     decoration: InputDecoration(
                       labelText: 'Status',
                       border: OutlineInputBorder(
@@ -348,12 +350,9 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                     ],
                     onChanged: (value) => setState(() => _statusFiltro = value),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Calibração
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _calibracaoFiltro,
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: _calibracaoFiltro,
                     decoration: InputDecoration(
                       labelText: 'Calibração',
                       border: OutlineInputBorder(
@@ -371,19 +370,98 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                     onChanged: (value) =>
                         setState(() => _calibracaoFiltro = value),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Limpar Filtros
-                OutlinedButton.icon(
-                  onPressed: _limparFiltros,
-                  icon: const Icon(Icons.filter_alt_outlined),
-                  label: const Text('Limpar Filtros'),
-                ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _limparFiltros,
+                      icon: const Icon(Icons.filter_alt_outlined),
+                      label: const Text('Limpar Filtros'),
+                    ),
+                  ),
+                ] else ...[
+                  // Layout horizontal para telas grandes
+                  Row(
+                    children: [
+                      // Busca
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Buscar por patrimônio',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Status
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _statusFiltro,
+                          decoration: InputDecoration(
+                            labelText: 'Status',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          items: [
+                            const DropdownMenuItem(
+                                value: null, child: Text('Todos os status')),
+                            ..._status.map((status) => DropdownMenuItem(
+                                value: status, child: Text(status))),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _statusFiltro = value),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Calibração
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _calibracaoFiltro,
+                          decoration: InputDecoration(
+                            labelText: 'Calibração',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          items: [
+                            const DropdownMenuItem(
+                                value: null,
+                                child: Text('Todas as calibrações')),
+                            ..._calibracoes.map((cal) =>
+                                DropdownMenuItem(value: cal, child: Text(cal))),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _calibracaoFiltro = value),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Limpar Filtros
+                      OutlinedButton.icon(
+                        onPressed: _limparFiltros,
+                        icon: const Icon(Icons.filter_alt_outlined),
+                        label: const Text('Limpar Filtros'),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -409,109 +487,257 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
       );
     }
 
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Lista de Instrumentos',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columnSpacing: 24.0,
-              horizontalMargin: 16.0,
-              headingRowHeight: 56.0,
-              dataRowMinHeight: 64.0,
-              dataRowMaxHeight: 80.0,
-              columns: const [
-                DataColumn(
-                    label: Text('Patrimônio',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Descrição',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Status',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Responsável',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Local Atual',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Data Devolução Prevista',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Status Devolução',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Calibração',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Próxima Calibração',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Ações',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ],
-              rows: instrumentos.map((repo.Instrumento instrumento) {
-                return DataRow(
-                  cells: [
-                    DataCell(Text(instrumento.patrimonio ??
-                        instrumento.numeroSerie ??
-                        instrumento.id)),
-                    DataCell(
-                      SizedBox(
-                        width: 250,
-                        child: Text(
-                          instrumento.nome,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Em telas menores que 900px, mostra cards ao invés de tabela
+        if (constraints.maxWidth < 900) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Lista de Instrumentos',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    DataCell(_buildStatusChip(instrumento.status)),
-                    DataCell(
-                      instrumento.responsavel != null &&
-                              instrumento.dataEmprestimo != null
-                          ? Text(
-                              '${instrumento.responsavel}\n${_formatDate(instrumento.dataEmprestimo!)}',
-                              style: const TextStyle(fontSize: 12),
-                            )
-                          : const Text('-'),
-                    ),
-                    DataCell(Text(instrumento.localizacao ?? '-')),
-                    DataCell(
-                      instrumento.dataDevolucaoPrevista != null
-                          ? Text(
-                              _formatDate(instrumento.dataDevolucaoPrevista!))
-                          : const Text('-'),
-                    ),
-                    DataCell(_buildStatusDevolucaoChip(
-                        instrumento.dataDevolucaoPrevista)),
-                    DataCell(
-                        _buildCalibracaoChip(instrumento.statusCalibracao)),
-                    DataCell(
-                      instrumento.proximaCalibracao != null
-                          ? Text(_formatDate(instrumento.proximaCalibracao!))
-                          : const Text('-'),
-                    ),
-                    DataCell(_buildAcoes(context, instrumento)),
+                ),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: instrumentos.length,
+                itemBuilder: (context, index) {
+                  return _buildInstrumentoCard(context, instrumentos[index]);
+                },
+              ),
+            ],
+          );
+        }
+
+        // Em telas maiores, mostra a tabela tradicional
+        return Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Lista de Instrumentos',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columnSpacing: 24.0,
+                  horizontalMargin: 16.0,
+                  headingRowHeight: 56.0,
+                  dataRowMinHeight: 64.0,
+                  dataRowMaxHeight: 80.0,
+                  columns: const [
+                    DataColumn(
+                        label: Text('Patrimônio',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Descrição',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Status',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Responsável',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Local Atual',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Data Devolução Prevista',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Status Devolução',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Calibração',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Próxima Calibração',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                        label: Text('Ações',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
                   ],
-                );
-              }).toList(),
+                  rows: instrumentos.map((repo.Instrumento instrumento) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(instrumento.patrimonio ??
+                            instrumento.numeroSerie ??
+                            instrumento.id)),
+                        DataCell(
+                          SizedBox(
+                            width: 250,
+                            child: Text(
+                              instrumento.nome,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        DataCell(_buildStatusChip(instrumento.status)),
+                        DataCell(
+                          instrumento.responsavel != null &&
+                                  instrumento.dataEmprestimo != null
+                              ? Text(
+                                  '${instrumento.responsavel}\n${_formatDate(instrumento.dataEmprestimo!)}',
+                                  style: const TextStyle(fontSize: 12),
+                                )
+                              : const Text('-'),
+                        ),
+                        DataCell(Text(instrumento.localizacao ?? '-')),
+                        DataCell(
+                          instrumento.dataDevolucaoPrevista != null
+                              ? Text(_formatDate(
+                                  instrumento.dataDevolucaoPrevista!))
+                              : const Text('-'),
+                        ),
+                        DataCell(_buildStatusDevolucaoChip(
+                            instrumento.dataDevolucaoPrevista)),
+                        DataCell(
+                            _buildCalibracaoChip(instrumento.statusCalibracao)),
+                        DataCell(
+                          instrumento.proximaCalibracao != null
+                              ? Text(
+                                  _formatDate(instrumento.proximaCalibracao!))
+                              : const Text('-'),
+                        ),
+                        DataCell(_buildAcoes(context, instrumento)),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInstrumentoCard(
+      BuildContext context, repo.Instrumento instrumento) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        instrumento.nome,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Patrimônio: ${instrumento.patrimonio ?? instrumento.numeroSerie ?? instrumento.id}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildStatusChip(instrumento.status),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: [
+                _buildInfoItem(
+                  context,
+                  Icons.person,
+                  'Responsável',
+                  instrumento.responsavel != null &&
+                          instrumento.dataEmprestimo != null
+                      ? '${instrumento.responsavel}\n${_formatDate(instrumento.dataEmprestimo!)}'
+                      : '-',
+                ),
+                _buildInfoItem(
+                  context,
+                  Icons.location_on,
+                  'Local',
+                  instrumento.localizacao ?? '-',
+                ),
+                if (instrumento.dataDevolucaoPrevista != null)
+                  _buildInfoItem(
+                    context,
+                    Icons.calendar_today,
+                    'Devolução Prevista',
+                    _formatDate(instrumento.dataDevolucaoPrevista!),
+                  ),
+                _buildInfoItem(
+                  context,
+                  Icons.verified,
+                  'Calibração',
+                  '',
+                  chip: _buildCalibracaoChip(instrumento.statusCalibracao),
+                ),
+              ],
+            ),
+            if (instrumento.dataDevolucaoPrevista != null) ...[
+              const SizedBox(height: 12),
+              _buildStatusDevolucaoChip(instrumento.dataDevolucaoPrevista),
+            ],
+            const SizedBox(height: 16),
+            _buildAcoes(context, instrumento),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    Widget? chip,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+        if (chip != null)
+          chip
+        else
+          Flexible(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 

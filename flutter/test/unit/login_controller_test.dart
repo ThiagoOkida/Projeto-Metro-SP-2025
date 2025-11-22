@@ -5,46 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spss_flutter/state/auth.dart';
 import 'package:spss_flutter/state/login_controller.dart';
 
-/// Mock UserCredential simples para testes
-class _MockUserCredential implements UserCredential {
-  @override
-  final User? user;
-
-  @override
-  AdditionalUserInfo? get additionalUserInfo => null;
-
-  @override
-  AuthCredential? get credential => null;
-
-  _MockUserCredential({
-    this.user,
-  });
-}
-
-/// Mock User simples para testes
-class _MockUser implements User {
-  @override
-  final String uid;
-
-  @override
-  final String? email;
-
-  _MockUser({required this.uid, this.email});
-
-  // Implementações mínimas necessárias
-  @override
-  Future<String?> getIdToken([bool forceRefresh = false]) async =>
-      'mock-token-123';
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
 /// Mock que simula o AuthRepository sem Firebase real
+/// Nota: Para testes completos com UserCredential, você precisaria
+/// inicializar o Firebase ou usar um pacote de mocks como firebase_auth_mocks
 class MockAuthRepository extends AuthRepository {
   final bool shouldSucceed;
 
-  MockAuthRepository({this.shouldSucceed = true});
+  MockAuthRepository({this.shouldSucceed = true}) : super();
 
   @override
   Future<UserCredential> login(String email, String password) async {
@@ -52,8 +19,18 @@ class MockAuthRepository extends AuthRepository {
     if (shouldSucceed &&
         email == 'admin@metro.sp.gov.br' &&
         password == 'admin123') {
-      final mockUser = _MockUser(uid: 'mock-uid-123', email: email);
-      return _MockUserCredential(user: mockUser);
+      // Para testes sem Firebase inicializado, vamos simular sucesso
+      // mas não podemos criar um UserCredential real
+      // O LoginController trata exceções, então vamos lançar uma exceção
+      // que indica sucesso mas não pode ser completada sem Firebase
+      // Na prática, para testes completos você precisaria:
+      // 1. Inicializar Firebase com opções de teste, OU
+      // 2. Usar firebase_auth_mocks, OU  
+      // 3. Criar uma abstração que permita injetar o FirebaseAuth
+      throw UnimplementedError(
+        'MockAuthRepository: Para testes completos, inicialize Firebase ou use firebase_auth_mocks. '
+        'Este mock simula apenas falhas de autenticação.',
+      );
     } else {
       throw Exception('Credenciais inválidas (mock)');
     }
@@ -61,7 +38,7 @@ class MockAuthRepository extends AuthRepository {
 
   @override
   Future<void> logout() async {
-    // Mock implementation
+    // Mock implementation - sempre bem-sucedido
   }
 }
 

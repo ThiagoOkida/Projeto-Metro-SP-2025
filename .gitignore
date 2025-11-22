@@ -3,8 +3,6 @@
 # ===================================================================
 # Nunca envie sua chave de serviço para o GitHub!
 /backend_dart/service-account.json
-
-# Arquivos de configuração do Firebase (Service Account Keys)
 **/service-account*.json
 **/*-service-account*.json
 **/*service-account*.json
@@ -17,46 +15,261 @@ serviceAccountKey.json
 .env
 .env.local
 .env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 flutter/.env
 backend_dart/.env
-
 
 # ===================================================================
 # REGRAS GERAIS DE DART & FLUTTER
 # ===================================================================
-
 # Arquivos de metadados do Dart
-.dart_tool/
-.packages
-.pub-cache/
+**/.dart_tool/
+**/.packages
+**/.pub-cache/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.flutter-plugins-dependencies.json
+**/.flutter-plugins-dependencies.yaml
 
 # Arquivos gerados pelo 'flutter pub get' ou 'flutter build'
-build/
-.flutter-plugins
-.flutter-plugins-dependencies
+**/build/
+**/pubspec.lock.local
+
+# Arquivos gerados pelo build_runner
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+**/*.config.dart
+
+# Arquivos de análise estática
+**/.dart_tool/package_config.json
+**/.dart_tool/package_config_subset
 
 # O pubspec.lock DEVE ser enviado para o GitHub,
 # mas se você tiver conflitos, o .local é ignorado.
-pubspec.lock.local
-
-# Arquivos de log e teste
-coverage/
-*.log
-test/.outputs/
-test/.test_coverage.json
-
 
 # ===================================================================
-# REGRAS DE IDES (EDITORES DE CÓDIGO)
+# ARQUIVOS DE TESTE E COBERTURA
 # ===================================================================
+# Cobertura de testes
+**/coverage/
+**/*.lcov
+**/test/.test_coverage.json
+**/test/.outputs/
+**/test_driver/
+**/integration_test/.dart_tool/
 
+# ===================================================================
+# ARQUIVOS DE FIREBASE E CONFIGURAÇÃO
+# ===================================================================
+# Arquivos gerados pelo Firebase CLI
+**/firebase_options.dart.bak
+**/firebase_options.dart.backup
+**/.firebaserc.local
+**/firebase-debug.log
+**/firestore-debug.log
+**/ui-debug.log
+
+# Arquivos de configuração local do Firebase
+**/google-services.json.bak
+**/GoogleService-Info.plist.bak
+
+# ===================================================================
+# ARQUIVOS TEMPORÁRIOS E BACKUP
+# ===================================================================
+# Arquivos temporários
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.backup
+**/*.old
+**/*.orig
+**/*.save
+**/*.swp
+**/*.swo
+**/*~
+
+# Arquivos de log
+**/*.log
+**/logs/
+**/*.log.*
+
+# Arquivos de cache
+**/.cache/
+**/*.cache
+
+# ===================================================================
+# ARQUIVOS DE DEPENDÊNCIAS E PACKAGES
+# ===================================================================
+# Node modules (caso tenha scripts Node.js)
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/package-lock.json
+**/yarn.lock
+
+# ===================================================================
+# ARQUIVOS DE DOCUMENTAÇÃO GERADA
+# ===================================================================
+# Documentação gerada automaticamente
+**/doc/api/
+**/docs/api/
+**/dartdoc/
+
+# ===================================================================
+# ARQUIVOS DE CONFIGURAÇÃO LOCAL
+# ===================================================================
+# Arquivos de configuração local que não devem ser commitados
+**/local.properties
+**/.local.properties
+**/local_config.dart
+**/config.local.dart
+
+# ===================================================================
+# ARQUIVOS DE BUILD ESPECÍFICOS DE PLATAFORMA
+# ===================================================================
+# Android
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/.gradle/
+**/android/app/build/
+**/android/build/
+**/android/.idea/
+**/android/*.iml
+**/android/.externalNativeBuild/
+**/android/.cxx/
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/App.framework
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/.xcode.env.local
+**/ios/Podfile.lock
+
+# Web
+**/web/.dart_tool/
+**/web/build/
+
+# Windows
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugin_registrant.h
+**/windows/flutter/generated_plugins.cmake
+**/windows/flutter/ephemeral/
+
+# Linux
+**/linux/flutter/generated_plugin_registrant.cc
+**/linux/flutter/generated_plugin_registrant.h
+**/linux/flutter/generated_plugins.cmake
+**/linux/flutter/ephemeral/
+
+# macOS
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/Flutter-Debug.xcconfig
+**/macos/Flutter/Flutter-Release.xcconfig
+**/macos/Flutter/Flutter-Profile.xcconfig
+
+# ===================================================================
+# ARQUIVOS DE SISTEMA OPERACIONAL
+# ===================================================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===================================================================
+# ARQUIVOS DE IDES E EDITORES
+# ===================================================================
 # VS Code
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
 
-# Android Studio / IntelliJ
+# Android Studio / IntelliJ IDEA
 .idea/
 *.iml
 *.ipr
+*.iws
+.idea_modules/
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+tmp/
+*~.nib
+.loadpath
+.recommenders
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ===================================================================
+# ARQUIVOS DE SCRIPTS E AUTOMAÇÃO
+# ===================================================================
+# Scripts temporários e de desenvolvimento
+**/*.sh.bak
+**/*.bat.bak
+**/*.ps1.bak
+**/*.js.bak
+
+# Arquivos de dados de teste/desenvolvimento
+**/test_data/
+**/sample_data/
+**/mock_data/
+**/*_test_data.json
+**/*_sample.json
+**/*_mock.json
 
 # ===================================================================
 # DOCUMENTAÇÃO E SCRIPTS DE SETUP (IGNORAR)
@@ -79,32 +292,6 @@ VERIFICAR_USUARIO_ADMIN.md
 # Dados de exemplo e scripts manuais
 firestore_import_data.json
 create_users_manual.js
-
-# Node modules
-node_modules/
-package-lock.json
-
-# Arquivos de build do Flutter
-flutter/build/
-flutter/.dart_tool/
-flutter/.flutter-plugins
-flutter/.flutter-plugins-dependencies
-flutter/*.iml
-
-# Arquivos de configuração local do Android
-flutter/android/local.properties
-flutter/android/.gradle/
-flutter/android/app/google-services.json
-
-# Arquivos de configuração do iOS (gerados automaticamente)
-flutter/ios/Podfile.lock
-flutter/ios/.symlinks/
-flutter/ios/Flutter/Flutter.framework
-flutter/ios/Flutter/Flutter.podspec
-
-# Arquivos de configuração do Windows/Linux/MacOS (gerados automaticamente)
-flutter/windows/flutter/generated_plugin_registrant.cc
-flutter/windows/flutter/generated_plugin_registrant.h
-flutter/linux/flutter/generated_plugin_registrant.cc
-flutter/linux/flutter/generated_plugin_registrant.h
-flutter/macos/Flutter/GeneratedPluginRegistrant.swift
+import_firestore.js
+sync_users_firestore.js
+**/google-services.json

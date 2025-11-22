@@ -14,20 +14,28 @@ import 'state/auth.dart';
 
 /// Provider para o router que precisa acessar o estado de autenticação
 final routerProvider = Provider<GoRouter>((ref) {
+  // Observa o estado de autenticação para recriar o router quando necessário
   final authState = ref.watch(authStateProvider);
-
-  // Escuta mudanças no stream de autenticação para atualizar o router
-  ref.listen(authStateProvider, (previous, next) {
-    // Quando o estado de autenticação muda, o router será recriado
-    // e o redirect será executado novamente
-  });
-
+  
+  // Cria o router - será recriado quando authState mudar, mas isso é necessário
+  // para que o redirect funcione corretamente
   final router = GoRouter(
     initialLocation: '/login',
     redirect: (context, state) {
-      // Aguarda o estado carregar
+      // Aguarda o estado carregar (evita redirecionamentos durante inicialização)
       if (authState.isLoading) {
         return null; // Não redireciona enquanto carrega
+      }
+
+      // Trata erros do authStateProvider
+      if (authState.hasError) {
+        // Se houver erro, permite acesso à tela de login
+        final isGoingToLogin = state.matchedLocation == '/login';
+        final isGoingToCadastro = state.matchedLocation == '/cadastro';
+        if (!isGoingToLogin && !isGoingToCadastro) {
+          return '/login';
+        }
+        return null;
       }
 
       final isLoggedIn = authState.asData?.value != null;
@@ -82,31 +90,4 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-/// Router legado para compatibilidade (usa o provider)
-final router = GoRouter(
-  initialLocation: '/login',
-  routes: [
-    GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
-    GoRoute(
-      path: '/cadastro',
-      builder: (context, state) => const CadastroPage(),
-    ),
-    ShellRoute(
-      builder: (context, state, child) => ShellScaffold(child: child),
-      routes: [
-        GoRoute(path: '/', builder: (_, __) => const DashboardPage()),
-        GoRoute(path: '/materiais', builder: (_, __) => const MateriaisPage()),
-        GoRoute(
-            path: '/instrumentos',
-            builder: (_, __) => const InstrumentosPage()),
-        GoRoute(
-            path: '/relatorios', builder: (_, __) => const RelatoriosPage()),
-        GoRoute(path: '/alertas', builder: (_, __) => const AlertasPage()),
-        GoRoute(path: '/usuarios', builder: (_, __) => const UsuariosPage()),
-        GoRoute(
-            path: '/configuracoes',
-            builder: (_, __) => const ConfiguracoesPage()),
-      ],
-    ),
-  ],
-);
+// Router legado removido - usar routerProvider ao invés disso

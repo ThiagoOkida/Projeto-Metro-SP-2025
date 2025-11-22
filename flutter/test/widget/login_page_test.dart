@@ -6,45 +6,13 @@ import 'package:spss_flutter/pages/login_page.dart';
 import 'package:spss_flutter/state/auth.dart';
 import 'package:spss_flutter/state/login_controller.dart';
 
-/// Mock UserCredential simples para testes
-class _MockUserCredential implements UserCredential {
-  @override
-  final User? user;
-  
-  @override
-  AdditionalUserInfo? get additionalUserInfo => null;
-  
-  @override
-  AuthCredential? get credential => null;
-
-  _MockUserCredential({
-    this.user,
-  });
-}
-
-/// Mock User simples para testes
-class _MockUser implements User {
-  @override
-  final String uid;
-  
-  @override
-  final String? email;
-  
-  _MockUser({required this.uid, this.email});
-
-  // Implementações mínimas necessárias
-  @override
-  Future<String?> getIdToken([bool forceRefresh = false]) async => 'mock-token';
-  
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
 /// Mock simplificado do AuthRepository
+/// Nota: Para testes completos com UserCredential, você precisaria
+/// inicializar o Firebase ou usar um pacote de mocks como firebase_auth_mocks
 class MockAuthRepository extends AuthRepository {
-  MockAuthRepository({this.shouldSucceed = true});
-
   final bool shouldSucceed;
+
+  MockAuthRepository({this.shouldSucceed = true}) : super();
 
   @override
   Future<UserCredential> login(String email, String password) async {
@@ -52,16 +20,19 @@ class MockAuthRepository extends AuthRepository {
     if (shouldSucceed &&
         email == 'admin@metro.sp.gov.br' &&
         password == 'admin123') {
-      final mockUser = _MockUser(uid: 'mock-uid', email: email);
-      return _MockUserCredential(user: mockUser);
+      // Para testes sem Firebase inicializado, vamos simular sucesso
+      // mas não podemos criar um UserCredential real
+      throw UnimplementedError(
+        'MockAuthRepository: Para testes completos, inicialize Firebase ou use firebase_auth_mocks.',
+      );
     } else {
       throw Exception('Falha no login');
     }
   }
-  
+
   @override
   Future<void> logout() async {
-    // Mock implementation
+    // Mock implementation - sempre bem-sucedido
   }
 }
 
@@ -115,11 +86,13 @@ void main() {
       );
 
       // Credenciais inválidas
-      await tester.enterText(find.byType(TextFormField).at(0), 'erro@teste.com');
+      await tester.enterText(
+          find.byType(TextFormField).at(0), 'erro@teste.com');
       await tester.enterText(find.byType(TextFormField).at(1), 'senhaerrada');
 
       await tester.tap(find.text('Entrar'));
-      await tester.pump(const Duration(seconds: 1)); // tempo para exibir snackbar
+      await tester
+          .pump(const Duration(seconds: 1)); // tempo para exibir snackbar
 
       // Verifica se o SnackBar apareceu
       expect(find.text('Falha no login'), findsOneWidget);

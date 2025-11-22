@@ -20,17 +20,17 @@ class RetirarInstrumentoDialog extends ConsumerStatefulWidget {
 
 class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _responsavelController = TextEditingController();
-  final _localizacaoController = TextEditingController();
+  String? _responsavelSelecionado;
+  String? _baseOperacionalSelecionada;
   DateTime? _dataDevolucaoPrevista;
   bool _isSubmitting = false;
 
-  @override
-  void dispose() {
-    _responsavelController.dispose();
-    _localizacaoController.dispose();
-    super.dispose();
-  }
+  // Lista de bases operacionais
+  final List<String> _basesOperacionais = [
+    'Base Sé',
+    'Base Jabaquara',
+    'Base Vila Madalena',
+  ];
 
   Future<void> _selectDate() async {
     try {
@@ -77,7 +77,10 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate() && _dataDevolucaoPrevista != null) {
+    if (_formKey.currentState!.validate() && 
+        _responsavelSelecionado != null && 
+        _baseOperacionalSelecionada != null &&
+        _dataDevolucaoPrevista != null) {
       setState(() {
         _isSubmitting = true;
       });
@@ -89,8 +92,8 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
         await instrumentosRepository.retirarInstrumento(
           instrumentoId: widget.instrumento.id,
           responsavelId: user?.uid ?? 'unknown',
-          responsavelNome: _responsavelController.text,
-          localizacao: _localizacaoController.text,
+          responsavelNome: _responsavelSelecionado!,
+          localizacao: _baseOperacionalSelecionada!,
           dataDevolucaoPrevista: _dataDevolucaoPrevista!,
         );
 
@@ -104,8 +107,8 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
             entidade: 'instrumento',
             detalhes: 'Instrumento: ${widget.instrumento.nome}\n'
                 'Patrimônio: ${widget.instrumento.patrimonio ?? "N/A"}\n'
-                'Responsável: ${_responsavelController.text}\n'
-                'Localização: ${_localizacaoController.text.isEmpty ? "Não informada" : _localizacaoController.text}\n'
+                'Responsável: ${_responsavelSelecionado ?? "Não informado"}\n'
+                'Base Operacional: ${_baseOperacionalSelecionada ?? "Não informada"}\n'
                 'Devolução prevista: ${_dataDevolucaoPrevista != null ? DateFormat('dd/MM/yyyy').format(_dataDevolucaoPrevista!) : "Não informada"}',
           );
         } catch (e) {
@@ -164,43 +167,120 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
                     ),
               ),
               const SizedBox(height: 24),
-              TextFormField(
-                controller: _responsavelController,
-                decoration: const InputDecoration(
-                  labelText: 'Responsável *',
-                  border: OutlineInputBorder(),
-                  hintText: 'Nome do responsável',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, informe o responsável.';
-                  }
-                  return null;
+              // Selection box para Responsável
+              Consumer(
+                builder: (context, ref, child) {
+                  final usuariosAsync = ref.watch(usuariosProvider);
+                  
+                  return usuariosAsync.when(
+                    data: (usuarios) {
+                      // Filtra apenas usuários ativos
+                      final usuariosAtivos = usuarios.where((u) => u.ativo).toList();
+                      
+                      return DropdownButtonFormField<String>(
+                        value: _responsavelSelecionado,
+                        decoration: InputDecoration(
+                          labelText: 'Responsável *',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          prefixIcon: const Icon(Icons.person),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                        hint: const Text('Selecione o responsável'),
+                        items: usuariosAtivos.map((usuario) {
+                          return DropdownMenuItem<String>(
+                            value: usuario.nome,
+                            child: Text('${usuario.nome}${usuario.email.isNotEmpty ? " (${usuario.email})" : ""}'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _responsavelSelecionado = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, selecione o responsável.';
+                          }
+                          return null;
+                        },
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      );
+                    },
+                    loading: () => DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Responsável *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      hint: const Text('Carregando usuários...'),
+                      items: const [],
+                      onChanged: (_) {},
+                    ),
+                    error: (error, stack) => DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Responsável *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      hint: Text('Erro ao carregar: $error'),
+                      items: const [],
+                      onChanged: (_) {},
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _localizacaoController,
-                decoration: const InputDecoration(
-                  labelText: 'Localização *',
-                  border: OutlineInputBorder(),
-                  hintText: 'Ex: Base Jabaquara, Base Sé',
+              // Selection box para Base Operacional
+              DropdownButtonFormField<String>(
+                value: _baseOperacionalSelecionada,
+                decoration: InputDecoration(
+                  labelText: 'Base Operacional *',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  prefixIcon: const Icon(Icons.location_on),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 ),
+                hint: const Text('Selecione a base operacional'),
+                items: _basesOperacionais.map((base) {
+                  return DropdownMenuItem<String>(
+                    value: base,
+                    child: Text(base),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _baseOperacionalSelecionada = value;
+                  });
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor, informe a localização.';
+                    return 'Por favor, selecione a base operacional.';
                   }
                   return null;
                 },
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 16),
               InkWell(
                 onTap: _selectDate,
+                borderRadius: BorderRadius.circular(8),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Data de Devolução Prevista *',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    suffixIcon: const Icon(Icons.calendar_today),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                   child: Text(
                     _dataDevolucaoPrevista != null
@@ -208,6 +288,7 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
                         : 'Selecione uma data',
                     style: TextStyle(
                       color: _dataDevolucaoPrevista != null ? Colors.black87 : Colors.grey[600],
+                      fontSize: 16,
                     ),
                   ),
                 ),
@@ -227,10 +308,25 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
       actions: [
         TextButton(
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(false),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: _isSubmitting ? null : _submitForm,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+          ),
           child: _isSubmitting
               ? const SizedBox(
                   width: 20,
@@ -240,7 +336,14 @@ class _RetirarInstrumentoDialogState extends ConsumerState<RetirarInstrumentoDia
                     color: Colors.white,
                   ),
                 )
-              : const Text('Confirmar Retirada'),
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.check_circle_outline, size: 18),
+                    SizedBox(width: 8),
+                    Text('Confirmar Retirada'),
+                  ],
+                ),
         ),
       ],
     );

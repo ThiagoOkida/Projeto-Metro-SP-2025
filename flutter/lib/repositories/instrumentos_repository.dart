@@ -254,5 +254,39 @@ class InstrumentosRepository {
       throw Exception('Erro ao devolver instrumento: $e');
     }
   }
+
+  /// Cria um novo instrumento
+  Future<String> criarInstrumento({
+    required String nome,
+    String? numeroSerie,
+    String? patrimonio,
+    String? categoria,
+    String? localizacao,
+    DateTime? dataCalibracao,
+    DateTime? proximaCalibracao,
+    String? observacoes,
+  }) async {
+    try {
+      final docRef = await _firestore.collection('instrumentos').add({
+        'nome': nome,
+        'numeroSerie': numeroSerie,
+        'patrimonio': patrimonio,
+        'categoria': categoria,
+        'status': 'disponivel',
+        'localizacao': localizacao,
+        'responsavel': null,
+        'dataEmprestimo': null,
+        'dataDevolucaoPrevista': null,
+        'dataCalibracao': dataCalibracao != null ? Timestamp.fromDate(dataCalibracao) : null,
+        'proximaCalibracao': proximaCalibracao != null ? Timestamp.fromDate(proximaCalibracao) : null,
+        'observacoes': observacoes,
+        'criadoEm': FieldValue.serverTimestamp(),
+        'atualizadoEm': FieldValue.serverTimestamp(),
+      });
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Erro ao criar instrumento: $e');
+    }
+  }
 }
 

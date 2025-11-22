@@ -159,5 +159,37 @@ class MateriaisRepository {
           return materiais;
         });
   }
+
+  /// Cria um novo material
+  Future<String> criarMaterial({
+    required String nome,
+    required int quantidade,
+    String? descricao,
+    String? categoria,
+    String? tipo,
+    String? unidade,
+    String? localizacao,
+    String? codigo,
+    int? quantidadeMinima,
+  }) async {
+    try {
+      final docRef = await _firestore.collection('materiais').add({
+        'nome': nome,
+        'quantidade': quantidade,
+        'descricao': descricao,
+        'categoria': categoria,
+        'tipo': tipo,
+        'unidade': unidade ?? 'Peça',
+        'localizacao': localizacao,
+        'codigo': codigo,
+        'quantidadeMinima': quantidadeMinima,
+        'criadoEm': FieldValue.serverTimestamp(),
+        'atualizadoEm': FieldValue.serverTimestamp(),
+      });
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Erro ao criar material: $e');
+    }
+  }
 }
 
