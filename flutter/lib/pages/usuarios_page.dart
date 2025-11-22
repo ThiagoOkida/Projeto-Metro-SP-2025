@@ -26,8 +26,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
     final usuariosAsync = ref.watch(usuariosProvider);
     final isGestorOrAdmin = ref.watch(isGestorOrAdminProvider);
     final currentUserAsync = ref.watch(currentUserProvider);
-
-    // Debug: mostra informações do usuário atual
     currentUserAsync.whenData((usuario) {
       if (usuario != null) {
         debugPrint('🔍 Usuário atual: ${usuario.nome} (${usuario.email})');
@@ -38,7 +36,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
       }
     });
 
-    // Verifica permissão
     if (!isGestorOrAdmin) {
       return Padding(
         padding: const EdgeInsets.all(24.0),
@@ -79,7 +76,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  // Mostra informações de debug
                   currentUserAsync.when(
                     data: (usuario) {
                       if (usuario == null) {
@@ -211,7 +207,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com título e botão
             Row(
               children: [
                 Expanded(
@@ -250,8 +245,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Cards de Resumo
             usuariosAsync.when(
               data: (usuarios) {
                 final total = usuarios.length;
@@ -263,10 +256,7 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
               loading: () => _buildSummaryCardsLoading(context),
               error: (_, __) => const SizedBox(),
             ),
-
             const SizedBox(height: 24),
-
-            // Busca e Tabela
             usuariosAsync.when(
               data: (usuarios) {
                 final filtrados = _filtrarUsuarios(usuarios);
@@ -359,7 +349,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
           tooltip: 'Editar usuário',
           onPressed: () => _editarUsuario(context, usuario),
         ),
-        // Botão de deletar só aparece para gestores e admins
         if (isGestorOrAdmin)
           IconButton(
             icon: const Icon(Icons.delete, size: 20, color: Colors.red),
@@ -387,7 +376,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
   }
 
   Future<void> _deletarUsuario(BuildContext context, repo.Usuario usuario) async {
-    // Confirmação antes de deletar
     final confirmacao = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -461,8 +449,6 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
         final usuarioNome = usuario.nome;
         final usuarioEmail = usuario.email;
         await repository.deletarUsuario(usuario.id);
-        
-        // Envia notificação por email para gestores e admins
         try {
           final emailService = ref.read(emailNotificationServiceProvider);
           await emailService.enviarNotificacao(
@@ -509,7 +495,7 @@ class _UsuariosPageState extends ConsumerState<UsuariosPage> {
           mainAxisSpacing: 16,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 2.8, // Ajustado para evitar overflow
+          childAspectRatio: 2.8, 
           children: [
             _SummaryCard(
               title: 'Total de Usuários',

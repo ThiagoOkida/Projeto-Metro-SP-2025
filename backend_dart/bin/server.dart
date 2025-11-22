@@ -6,15 +6,8 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:http/http.dart' as http;
 
-//
-// 🧾 Função para salvar usuário via REST API do Firestore
-// NOTA: Esta função é mantida para compatibilidade, mas o cadastro agora é feito
-// diretamente pelo Flutter usando Firebase Auth e Firestore SDK.
-// Para usar esta função, você precisa de um Service Account do Firebase.
-//
 Future<void> salvarUsuarioNoFirestore(
     String uid, String nome, String email) async {
-  // Obtém o projectId das variáveis de ambiente ou usa um valor padrão
   final projectId = Platform.environment['FIREBASE_PROJECT_ID'] ?? 'seu-projeto-id';
   
   if (projectId == 'seu-projeto-id') {
@@ -34,10 +27,6 @@ Future<void> salvarUsuarioNoFirestore(
       'criadoEm': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
     }
   });
-
-  // NOTA: Para usar a REST API do Firestore, você precisa de autenticação.
-  // Considere usar o Firebase Admin SDK para Dart ou configurar OAuth2.
-  final response = await http.patch(
     url,
     headers: {'Content-Type': 'application/json'},
     body: body,
@@ -50,18 +39,8 @@ Future<void> salvarUsuarioNoFirestore(
     throw Exception('Erro ao salvar usuário no Firestore');
   }
 }
-
-//
-// 🚀 Servidor Shelf
-//
 void main() async {
   final router = Router();
-
-  // -------------------------------
-  // 🆕 ROTA DE CADASTRO (OPCIONAL)
-  // -------------------------------
-  // NOTA: O cadastro agora é feito diretamente pelo Flutter usando Firebase Auth e Firestore.
-  // Esta rota é mantida apenas para casos especiais ou integração com outros sistemas.
   router.post('/api/cadastro', (Request req) async {
     try {
       final body = jsonDecode(await req.readAsString());
@@ -91,13 +70,6 @@ void main() async {
       );
     }
   });
-
-  // -------------------------------
-  // 🔐 ROTA DE LOGIN (DEPRECADA)
-  // -------------------------------
-  // NOTA: A autenticação agora é feita diretamente pelo Flutter usando Firebase Auth.
-  // Esta rota é mantida apenas para compatibilidade com código legado.
-  // Considere remover esta rota se não for mais necessária.
   router.post('/auth/login', (Request req) async {
     return Response(
       410, // Gone - recurso não está mais disponível
@@ -108,10 +80,6 @@ void main() async {
       headers: {'Content-Type': 'application/json'},
     );
   });
-
-  // -------------------------------
-  // 🌍 CONFIGURAÇÃO DO SERVIDOR
-  // -------------------------------
   final handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(corsHeaders())

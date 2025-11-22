@@ -15,13 +15,11 @@ class DashboardPage extends ConsumerWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
-        // SingleChildScrollView permite que a tela role em telas menores
         child: Padding(
-          padding: const EdgeInsets.all(24.0), // Padding geral da página
+          padding: const EdgeInsets.all(24.0), 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Títulos da página
               Text(
                 'Dashboard',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -36,7 +34,6 @@ class DashboardPage extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const Spacer(),
-                  // "Chip" de Status Online
                   Chip(
                     avatar: Icon(
                       Icons.circle,
@@ -54,21 +51,11 @@ class DashboardPage extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24), // Espaço antes do grid
-
-              // --- Grid de Resumo ---
+              const SizedBox(height: 24),
               _buildSummaryGrid(context, ref, statsAsync),
-
               const SizedBox(height: 24),
-
-              // --- Ações Rápidas ---
               _buildAcoesRapidas(context, ref),
-
               const SizedBox(height: 24),
-
-              // --- Próximas Seções (Alertas e Atividade) ---
-              // Vamos adicionar o conteúdo aqui nas próximas etapas
-              // _buildAlertsAndActivity(context),
             ],
           ),
         ),
@@ -76,23 +63,19 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  /// Constrói o grid de 4 colunas que se adapta ao tamanho da tela.
   Widget _buildSummaryGrid(BuildContext context, WidgetRef ref,
       AsyncValue<DashboardStats> statsAsync) {
-    // LayoutBuilder é usado para pegar o tamanho da tela e tornar o grid responsivo
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = 4; // Padrão (desktop)
+        int crossAxisCount = 4; 
         double screenWidth = constraints.maxWidth;
 
         if (screenWidth < 1200) {
-          crossAxisCount = 2; // Tablet
+          crossAxisCount = 2; 
         }
         if (screenWidth < 600) {
-          crossAxisCount = 1; // Celular
+          crossAxisCount = 1; 
         }
-
-        // Busca dados reais do Firestore
         return statsAsync.when(
           data: (stats) => GridView.count(
             crossAxisCount: crossAxisCount,
@@ -169,8 +152,6 @@ class DashboardPage extends ConsumerWidget {
       },
     );
   }
-
-  /// Constrói a seção de Ações Rápidas
   Widget _buildAcoesRapidas(BuildContext context, WidgetRef ref) {
     return Card(
       elevation: 2,
@@ -191,12 +172,12 @@ class DashboardPage extends ConsumerWidget {
             const SizedBox(height: 16),
             LayoutBuilder(
               builder: (context, constraints) {
-                int crossAxisCount = 4; // Desktop
+                int crossAxisCount = 4; 
                 if (constraints.maxWidth < 1200) {
-                  crossAxisCount = 2; // Tablet
+                  crossAxisCount = 2;
                 }
                 if (constraints.maxWidth < 600) {
-                  crossAxisCount = 1; // Mobile
+                  crossAxisCount = 1; 
                 }
 
                 return GridView.count(
@@ -216,8 +197,6 @@ class DashboardPage extends ConsumerWidget {
                           builder: (context) => const NovaRequisicaoDialog(),
                         );
                         if (result == true) {
-                          // Requisição criada com sucesso
-                          // O snackbar já foi mostrado no dialog
                         }
                       },
                     ),
@@ -230,8 +209,6 @@ class DashboardPage extends ConsumerWidget {
                           builder: (context) => const DevolverInstrumentoDialog(),
                         );
                         if (result == true) {
-                          // Instrumento devolvido com sucesso
-                          // O snackbar já foi mostrado no dialog
                         }
                       },
                     ),
@@ -259,8 +236,6 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 }
-
-/// Widget de loading para os cards
 class _SummaryCardLoading extends StatelessWidget {
   const _SummaryCardLoading();
 
@@ -354,8 +329,6 @@ class _SummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // --- Valor Principal ---
             Text(
               value,
               style: textTheme.headlineLarge?.copyWith(
@@ -364,8 +337,6 @@ class _SummaryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-
-            // --- Subtítulo (com cor) ---
             Chip(
               label: Text(subtitle),
               labelStyle: TextStyle(
@@ -380,9 +351,7 @@ class _SummaryCard extends StatelessWidget {
               visualDensity: VisualDensity.compact,
             ),
 
-            const Spacer(), // Empurra os detalhes para baixo
-
-            // --- Detalhes ---
+            const Spacer(), 
             Text(
               details,
               style: textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
@@ -393,8 +362,6 @@ class _SummaryCard extends StatelessWidget {
     );
   }
 }
-
-/// Widget para os cards de ação rápida
 class _AcaoRapidaCard extends StatelessWidget {
   final IconData icon;
   final String title;

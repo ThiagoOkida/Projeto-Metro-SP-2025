@@ -26,7 +26,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com título e ações
             Row(
               children: [
                 Expanded(
@@ -50,7 +49,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
                     ],
                   ),
                 ),
-                // Dropdown de período
                 DropdownButton<int>(
                   value: _selectedPeriodDays,
                   items: const [
@@ -66,7 +64,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
                   },
                 ),
                 const SizedBox(width: 16),
-                // Botão Exportar
                 ElevatedButton.icon(
                   onPressed: () => _exportarRelatorio(context),
                   icon: const Icon(Icons.download),
@@ -78,17 +75,12 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Cards de Resumo
             statsAsync.when(
               data: (stats) => _buildSummaryCards(context, stats),
               loading: () => _buildSummaryCardsLoading(context),
               error: (_, __) => const SizedBox(),
             ),
-
             const SizedBox(height: 24),
-
-            // Gráfico e Lista
             statsAsync.when(
               data: (stats) => _buildChartsAndList(context, stats),
               loading: () => const Center(
@@ -201,7 +193,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 1200) {
-          // Layout em coluna para telas menores
           return Column(
             children: [
               _buildMovimentacoesMensais(context, stats.movimentacoesMensais),
@@ -210,7 +201,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
             ],
           );
         }
-        // Layout em linha para telas maiores
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -382,7 +372,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
   }
 
   Future<void> _exportarRelatorio(BuildContext context) async {
-    // Verifica se os dados já estão carregados
     final statsAsync = ref.read(relatoriosStatsProvider(_selectedPeriodDays));
     
     if (statsAsync.isLoading) {
@@ -425,7 +414,6 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
     if (!context.mounted) return;
 
     try {
-      // Mostra mensagem de processamento
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -442,12 +430,8 @@ class _RelatoriosPageState extends ConsumerState<RelatoriosPage> {
           duration: Duration(seconds: 2),
         ),
       );
-
-      // Exporta o CSV
       final exportService = ExportService();
       await exportService.exportarRelatorioCSV(stats, _selectedPeriodDays);
-
-      // Mostra mensagem de sucesso
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

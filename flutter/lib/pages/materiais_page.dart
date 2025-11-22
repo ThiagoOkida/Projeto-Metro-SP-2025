@@ -34,8 +34,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
 
   List<repo.Material> _filtrarMateriais(List<repo.Material> materiais) {
     var filtrados = materiais;
-
-    // Filtro de busca
     if (_searchController.text.isNotEmpty) {
       final busca = _searchController.text.toLowerCase();
       filtrados = filtrados.where((m) {
@@ -45,15 +43,12 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
       }).toList();
     }
 
-    // Filtro de categoria/tipo
     if (_tipoFiltro != null) {
       filtrados = filtrados.where((m) {
-        // Verifica tanto categoria quanto tipo para compatibilidade
         return (m.categoria == _tipoFiltro) || (m.tipo == _tipoFiltro);
       }).toList();
     }
 
-    // Filtro de status
     if (_statusFiltro != null) {
       filtrados = filtrados.where((m) {
         switch (_statusFiltro) {
@@ -75,8 +70,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
   @override
   Widget build(BuildContext context) {
     final materiaisAsync = ref.watch(materiaisProvider);
-    
-    // Atualiza lista de categorias quando materiais mudam
     materiaisAsync.whenData((materiais) {
       final categoriasUnicas = materiais
           .where((m) => m.categoria != null && m.categoria!.isNotEmpty)
@@ -102,7 +95,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com título e botão
             Row(
               children: [
                 Expanded(
@@ -133,7 +125,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                       builder: (context) => const NovoMaterialDialog(),
                     );
                     if (result == true) {
-                      // Material criado com sucesso
                     }
                   },
                   icon: const Icon(Icons.add),
@@ -145,8 +136,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Cards de Resumo
             materiaisAsync.when(
               data: (materiais) {
                 final total = materiais.length;
@@ -161,13 +150,8 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
             ),
 
             const SizedBox(height: 24),
-
-            // Filtros e Busca
             _buildFiltros(context),
-
             const SizedBox(height: 16),
-
-            // Tabela de Materiais
             materiaisAsync.when(
               data: (materiais) {
                 final filtrados = _filtrarMateriais(materiais);
@@ -298,7 +282,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                 ),
                 const SizedBox(height: 16),
                 if (isSmallScreen) ...[
-                  // Layout vertical para telas pequenas
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
@@ -359,10 +342,8 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                     ),
                   ),
                 ] else ...[
-                  // Layout horizontal para telas grandes
                   Row(
                     children: [
-                      // Busca
                       Expanded(
                         flex: 3,
                         child: TextField(
@@ -380,7 +361,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Tipo
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _tipoFiltro,
@@ -403,7 +383,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Status
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _statusFiltro,
@@ -423,7 +402,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Limpar Filtros
                       OutlinedButton.icon(
                         onPressed: _limparFiltros,
                         icon: const Icon(Icons.filter_alt_outlined),
@@ -463,7 +441,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Em telas menores que 900px, mostra cards ao invés de tabela
         if (constraints.maxWidth < 900) {
           return Column(
             children: [
@@ -487,8 +464,6 @@ class _MateriaisPageState extends ConsumerState<MateriaisPage> {
             ],
           );
         }
-
-        // Em telas maiores, mostra a tabela tradicional
         return Card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

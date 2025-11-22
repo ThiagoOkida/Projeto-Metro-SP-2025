@@ -8,16 +8,13 @@ environment:
   sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
-  # -------------------------------
-  # 🧠 Servidor HTTP e roteamento
-  # -------------------------------
-  shelf: ^1.4.1                  # Framework HTTP leve
-  shelf_router: ^1.1.4           # Roteamento REST
-  shelf_cors_headers: ^0.1.5     # Middleware de CORS
-  shelf_static: ^1.1.2           # Para servir arquivos estáticos (opcional)
-  http_parser: ^4.0.2            # Utilitário para headers HTTP
-  path: ^1.9.0                   # Manipulação de caminhos
-  http: ^1.2.0       # SDK do Firebase para Dart
+  shelf: ^1.4.1 
+  shelf_router: ^1.1.4
+  shelf_cors_headers: ^0.1.5
+  shelf_static: ^1.1.2     
+  http_parser: ^4.0.2      
+  path: ^1.9.0
+  http: ^1.2.0
 
 dev_dependencies:
   lints: ^3.0.0

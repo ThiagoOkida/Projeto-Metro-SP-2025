@@ -44,8 +44,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
   List<repo.Instrumento> _filtrarInstrumentos(
       List<repo.Instrumento> instrumentos) {
     var filtrados = instrumentos;
-
-    // Filtro de busca
     if (_searchController.text.isNotEmpty) {
       final busca = _searchController.text.toLowerCase();
       filtrados = filtrados.where((inst) {
@@ -56,8 +54,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
         return patrimonio.contains(busca) || nome.contains(busca);
       }).toList();
     }
-
-    // Filtro de status
     if (_statusFiltro != null) {
       filtrados = filtrados.where((inst) {
         switch (_statusFiltro) {
@@ -75,7 +71,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
       }).toList();
     }
 
-    // Filtro de calibração
     if (_calibracaoFiltro != null) {
       filtrados = filtrados.where((inst) {
         switch (_calibracaoFiltro) {
@@ -104,7 +99,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com título e botão
             Row(
               children: [
                 Expanded(
@@ -139,7 +133,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                       builder: (context) => const NovoInstrumentoDialog(),
                     );
                     if (result == true) {
-                      // Instrumento criado com sucesso
                     }
                   },
                   icon: const Icon(Icons.add),
@@ -174,13 +167,8 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
             ),
 
             const SizedBox(height: 24),
-
-            // Filtros e Busca
             _buildFiltros(context),
-
             const SizedBox(height: 16),
-
-            // Tabela de Instrumentos
             instrumentosAsync.when(
               data: (instrumentos) {
                 final filtrados = _filtrarInstrumentos(instrumentos);
@@ -317,7 +305,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                 ),
                 const SizedBox(height: 16),
                 if (isSmallScreen) ...[
-                  // Layout vertical para telas pequenas
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
@@ -380,7 +367,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                     ),
                   ),
                 ] else ...[
-                  // Layout horizontal para telas grandes
                   Row(
                     children: [
                       // Busca
@@ -401,7 +387,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Status
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _statusFiltro,
@@ -424,7 +409,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Calibração
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _calibracaoFiltro,
@@ -448,7 +432,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Limpar Filtros
                       OutlinedButton.icon(
                         onPressed: _limparFiltros,
                         icon: const Icon(Icons.filter_alt_outlined),
@@ -489,7 +472,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Em telas menores que 900px, mostra cards ao invés de tabela
         if (constraints.maxWidth < 900) {
           return Column(
             children: [
@@ -513,8 +495,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
             ],
           );
         }
-
-        // Em telas maiores, mostra a tabela tradicional
         return Card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,15 +781,12 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
     String label;
 
     if (diasAtraso > 0) {
-      // Atrasado
       color = Colors.red;
       label = 'Atrasado ${diasAtraso}d';
     } else if (diasAtraso == 0) {
-      // Vence hoje
       color = Colors.orange;
       label = 'Vence hoje';
     } else {
-      // Ainda não venceu
       final diasRestantes = -diasAtraso;
       if (diasRestantes <= 3) {
         color = Colors.orange;
@@ -891,7 +868,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                     RetirarInstrumentoDialog(instrumento: instrumento),
               );
               if (result == true) {
-                // Instrumento retirado com sucesso
               }
             },
             child: const Text('Retirar', style: TextStyle(fontSize: 12)),
@@ -904,7 +880,6 @@ class _InstrumentosPageState extends ConsumerState<InstrumentosPage> {
                 builder: (context) => const DevolverInstrumentoDialog(),
               );
               if (result == true) {
-                // Instrumento devolvido
               }
             },
             child: const Text('Devolver', style: TextStyle(fontSize: 12)),

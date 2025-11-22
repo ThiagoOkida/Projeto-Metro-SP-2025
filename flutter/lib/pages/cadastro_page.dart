@@ -23,20 +23,14 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Lógica do Riverpod para estado e actions
     final state = ref.watch(cadastroControllerProvider);
     final controller = ref.read(cadastroControllerProvider.notifier);
-
-    // Cor primária do tema de login
     final primaryColor = Colors.blue.shade800;
-
-    // 2. Lógica de SnackBar (usando ref.listen)
     ref.listen(cadastroControllerProvider, (previousState, nextState) {
       if (nextState.status == CadastroStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cadastro realizado com sucesso!')),
         );
-        // Navega de volta para o login após o sucesso
         context.go('/login');
       }
       if (nextState.status == CadastroStatus.error &&
@@ -46,13 +40,10 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
         );
       }
     });
-
-    // 3. Estrutura visual copiada da LoginPage
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            // Garanta que esta imagem exista em assets/imagens/
             image: AssetImage("assets/imagens/img_metro.png"),
             fit: BoxFit.cover,
           ),
@@ -73,23 +64,18 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Logo
                       Image.asset(
-                        "assets/imagens/logo.png", // Garanta que esta imagem exista
+                        "assets/imagens/logo.png", 
                         height: 60,
                         alignment: Alignment.center,
                       ),
                       const SizedBox(height: 16),
-
-                      // Título
                       const Text(
-                        'Criar Nova Conta', // Título da página
+                        'Criar Nova Conta', 
                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
-
-                      // Campo Nome
                       TextFormField(
                         controller: _nomeController,
                         decoration: const InputDecoration(
@@ -100,8 +86,6 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
                             (v == null || v.isEmpty) ? 'Informe seu nome' : null,
                       ),
                       const SizedBox(height: 12),
-
-                      // Campo Email
                       TextFormField(
                         controller: _emailController,
                         decoration: const InputDecoration(
@@ -112,8 +96,6 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
                             (v == null || v.isEmpty) ? 'Informe o e-mail' : null,
                       ),
                       const SizedBox(height: 12),
-
-                      // Campo Senha
                       TextFormField(
                         controller: _passwordController,
                         decoration: InputDecoration(
@@ -134,8 +116,6 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
                             (v == null || v.isEmpty) ? 'Informe a senha' : null,
                       ),
                       const SizedBox(height: 12),
-
-                      // Campo Confirmar Senha
                       TextFormField(
                         controller: _confirmPasswordController,
                         decoration: InputDecoration(
@@ -157,8 +137,6 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
                             : null,
                       ),
                       const SizedBox(height: 20),
-
-                      // Botão Cadastrar
                       FilledButton(
                         onPressed: state.status == CadastroStatus.loading
                             ? null
@@ -190,11 +168,8 @@ class _CadastroPageState extends ConsumerState<CadastroPage> {
                                 style: TextStyle(fontSize: 16)),
                       ),
                       const SizedBox(height: 12),
-
-                      // Botão Voltar para Login
                       TextButton(
                         onPressed: () {
-                          // Navega de volta para a tela de login
                           context.go('/login');
                         },
                         style: TextButton.styleFrom(

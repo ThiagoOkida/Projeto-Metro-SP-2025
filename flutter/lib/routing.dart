@@ -12,24 +12,15 @@ import 'shell/shell_scaffold.dart';
 import 'pages/cadastro_page.dart';
 import 'state/auth.dart';
 
-/// Provider para o router que precisa acessar o estado de autenticação
 final routerProvider = Provider<GoRouter>((ref) {
-  // Observa o estado de autenticação para recriar o router quando necessário
   final authState = ref.watch(authStateProvider);
-  
-  // Cria o router - será recriado quando authState mudar, mas isso é necessário
-  // para que o redirect funcione corretamente
   final router = GoRouter(
     initialLocation: '/login',
     redirect: (context, state) {
-      // Aguarda o estado carregar (evita redirecionamentos durante inicialização)
       if (authState.isLoading) {
-        return null; // Não redireciona enquanto carrega
+        return null; 
       }
-
-      // Trata erros do authStateProvider
       if (authState.hasError) {
-        // Se houver erro, permite acesso à tela de login
         final isGoingToLogin = state.matchedLocation == '/login';
         final isGoingToCadastro = state.matchedLocation == '/cadastro';
         if (!isGoingToLogin && !isGoingToCadastro) {
@@ -37,30 +28,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         }
         return null;
       }
-
       final isLoggedIn = authState.asData?.value != null;
       final isGoingToLogin = state.matchedLocation == '/login';
       final isGoingToCadastro = state.matchedLocation == '/cadastro';
 
-      // Se não está logado e não está indo para login ou cadastro, redireciona para login
       if (!isLoggedIn && !isGoingToLogin && !isGoingToCadastro) {
         return '/login';
       }
-
-      // Se está logado e está tentando acessar login ou cadastro, redireciona para dashboard
       if (isLoggedIn && (isGoingToLogin || isGoingToCadastro)) {
         return '/';
       }
-
-      // A verificação de permissão para /usuarios é feita na própria página
-      // para ter feedback visual melhor (mensagem de acesso negado)
-
-      return null; // Não redireciona
+      return null; 
     },
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
-
-      // Rota de cadastro adicionada aqui, fora do ShellRoute
       GoRoute(
         path: '/cadastro',
         builder: (context, state) => const CadastroPage(),
@@ -90,4 +71,3 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-// Router legado removido - usar routerProvider ao invés disso

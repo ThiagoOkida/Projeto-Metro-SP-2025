@@ -11,11 +11,9 @@ import 'providers/theme_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Carrega variáveis de ambiente do arquivo .env
   try {
     await dotenv.load(fileName: '.env');
     debugPrint('✅ Arquivo .env carregado com sucesso');
-    // Verifica se as variáveis principais estão presentes
     final hasWebApiKey = dotenv.env['FIREBASE_WEB_API_KEY'] != null;
     final hasProjectId = dotenv.env['FIREBASE_WEB_PROJECT_ID'] != null;
     if (hasWebApiKey && hasProjectId) {
@@ -24,31 +22,24 @@ void main() async {
       debugPrint('⚠️ Algumas variáveis do Firebase não foram encontradas no .env');
     }
   } catch (e) {
-    // Se não encontrar .env, continua com valores padrão
-    // Isso permite desenvolvimento sem .env (usando valores do firebase_options.dart)
     debugPrint('⚠️ Aviso: Arquivo .env não encontrado ou erro ao carregar: $e');
     debugPrint('⚠️ Usando valores padrão do firebase_options.dart');
   }
   
-  // Inicializa serviço de encriptação (opcional - só se ENCRYPTION_KEY estiver no .env)
   try {
     EncryptionService().initialize();
   } catch (e) {
     debugPrint('Aviso: EncryptionService não inicializado: $e');
   }
   
-  // Inicializa Firebase com tratamento de erro
   try {
     final options = DefaultFirebaseOptions.currentPlatform;
-    
-    // Verifica se as opções são válidas (não são placeholders)
     if (options.apiKey.contains('YOUR_') || 
         options.projectId.contains('YOUR_') ||
         options.appId.contains('YOUR_')) {
       debugPrint('⚠️ AVISO: Firebase não está configurado corretamente!');
       debugPrint('⚠️ Execute: flutterfire configure');
       debugPrint('⚠️ Ou configure o arquivo .env com as credenciais do Firebase');
-      // Continua mesmo assim para não travar o app
     }
     
     await Firebase.initializeApp(options: options);
@@ -58,7 +49,6 @@ void main() async {
   } catch (e, stackTrace) {
     debugPrint('❌ ERRO ao inicializar Firebase: $e');
     debugPrint('Stack trace: $stackTrace');
-    // Continua mesmo assim para não travar o app completamente
   }
   
   runApp(const ProviderScope(child: MyApp()));

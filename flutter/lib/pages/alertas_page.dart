@@ -79,13 +79,8 @@ class _AlertasPageState extends ConsumerState<AlertasPage> {
             ),
 
             const SizedBox(height: 24),
-
-            // Filtros
             _buildFiltros(context),
-
             const SizedBox(height: 16),
-
-            // Lista de Alertas
             alertasAsync.when(
               data: (alertas) {
                 final filtrados = _filtrarAlertas(alertas);
@@ -301,8 +296,6 @@ class _AlertasPageState extends ConsumerState<AlertasPage> {
       try {
         final repository = ref.read(alertasRepositoryProvider);
         await repository.marcarAlertaComoResolvido(alerta.id);
-        
-        // Envia notificação por email para gestores e admins
         try {
           final emailService = ref.read(emailNotificationServiceProvider);
           await emailService.enviarNotificacao(
@@ -367,8 +360,6 @@ class _AlertasPageState extends ConsumerState<AlertasPage> {
       try {
         final repository = ref.read(alertasRepositoryProvider);
         await repository.ignorarAlerta(alerta.id);
-        
-        // Envia notificação por email para gestores e admins
         try {
           final emailService = ref.read(emailNotificationServiceProvider);
           await emailService.enviarNotificacao(
@@ -429,8 +420,6 @@ class _AlertasPageState extends ConsumerState<AlertasPage> {
       try {
         final repository = ref.read(alertasRepositoryProvider);
         await repository.marcarTodosComoLidos();
-        
-        // Envia notificação por email para gestores e admins
         try {
           final emailService = ref.read(emailNotificationServiceProvider);
           await emailService.enviarNotificacao(
@@ -519,7 +508,6 @@ class _AlertasPageState extends ConsumerState<AlertasPage> {
               child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: 16),
-            // Conteúdo
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

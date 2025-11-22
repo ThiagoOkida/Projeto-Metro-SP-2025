@@ -62,7 +62,6 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
         _nomeEmpresaController.text = config.nomeEmpresa;
         _idioma = config.idioma;
         _fusoHorario = config.fusoHorario;
-        // Sincroniza com o provider de tema
         _modoEscuro = themeMode == ThemeMode.dark;
         _notificacoesEmail = config.notificacoesEmail;
         _alertasEstoqueBaixo = config.alertasEstoqueBaixo;
@@ -109,20 +108,15 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
         smtpServer: _smtpServerController.text,
         smtpPort: _smtpPortController.text,
         smtpUser: _smtpUserController.text,
-        smtpPassword: _smtpPasswordController.text == '********' 
-            ? '' // Não atualiza se não foi alterado
+        smtpPassword: _smtpPasswordController.text == '********'
             : _smtpPasswordController.text,
       );
 
       await ref.read(configuracoesRepositoryProvider).salvarConfiguracoes(config);
-      
-      // Sincroniza o tema com o provider
       final themeNotifier = ref.read(themeModeProvider.notifier);
       await themeNotifier.setThemeMode(
         _modoEscuro ? ThemeMode.dark : ThemeMode.light,
       );
-      
-      // Envia notificação por email para gestores e admins
       try {
         final emailService = ref.read(emailNotificationServiceProvider);
         await emailService.enviarNotificacao(
@@ -206,7 +200,6 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com título e botão
             Row(
               children: [
                 Expanded(
@@ -244,12 +237,9 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Seções de Configurações
             _buildSecaoConfiguracoesGerais(context),
             const SizedBox(height: 24),
             _buildSecaoNotificacoes(context),
-            // Seções restritas a gestores e admins
             if (ref.watch(isGestorOrAdminProvider)) ...[
               const SizedBox(height: 24),
               _buildSecaoSeguranca(context),
@@ -340,12 +330,10 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     return Switch(
                       value: isDark,
                       onChanged: (value) async {
-                        // Aplica o tema em tempo real
                         final themeNotifier = ref.read(themeModeProvider.notifier);
                         await themeNotifier.setThemeMode(
                           value ? ThemeMode.dark : ThemeMode.light,
                         );
-                        // Atualiza o estado local também
                         setState(() => _modoEscuro = value);
                       },
                     );
